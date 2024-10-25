@@ -1,0 +1,63 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+#trigger:
+#- main
+trigger:
+  branches:
+    include:
+      - main  # You can adjust the branch based on your source control setup
+
+pool:
+  vmImage: 'ubuntu-latest'  # You can use a Windows agent as well if needed
+
+steps:
+  - task: UsePythonVersion@0  # Salesforce CLI uses node.js, ensure Node.js is available if needed
+    inputs:
+      versionSpec: '3.x'
+    displayName: 'Use Python 3.x'
+    
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '16.x'  # Salesforce CLI works with Node.js
+    displayName: 'Use Node.js 16.x'
+
+  - script: |
+      echo "Installing Salesforce CLI..."
+      npm install sfdx-cli --global
+    displayName: 'Install Salesforce CLI'
+
+  - script: |
+      echo "Authenticating to Salesforce Developer Org..."
+      sfdx auth:jwt:grant --client-id $DEV_ORG_CLIENT_ID --jwt-key-file keys/server.key --username $DEV_ORG_USERNAME --instance-url https://login.salesforce.com
+    env:
+      DEV_ORG_CLIENT_ID: $(DEV_ORG_CLIENT_ID)
+      DEV_ORG_USERNAME: $(DEV_ORG_USERNAME)
+      JWT_KEY: $(JWT_KEY)
+    displayName: 'Authenticate to Salesforce Dev Org'
+
+  - script: |
+      echo "Retrieving code from Salesforce Developer Org..."
+      sfdx force:source:retrieve -u $DEV_ORG_USERNAME -m ApexClass,ApexTrigger  # Adjust the metadata types based on your need
+    displayName: 'Retrieve metadata from Salesforce Dev Org'
+
+  - script: |
+      echo "Authenticating to Salesforce QA Org..."
+      sfdx auth:jwt:grant --client-id $QA_ORG_CLIENT_ID --jwt-key-file keys/server.key --username $QA_ORG_USERNAME --instance-url https://login.salesforce.com
+    env:
+      QA_ORG_CLIENT_ID: $(QA_ORG_CLIENT_ID)
+      QA_ORG_USERNAME: $(QA_ORG_USERNAME)
+      JWT_KEY: $(JWT_KEY)
+    displayName: 'Authenticate to Salesforce QA Org'
+
+  - script: |
+      echo "Deploying code to Salesforce QA Org..."
+      sfdx force:source:deploy -u $QA_ORG_USERNAME -m ApexClass,ApexTrigger  # Adjust the metadata types based on your need
+    displayName: 'Deploy metadata to Salesforce QA Org'
+
+#  - script: |
+#      echo "Running tests on QA Org..."
+#      sfdx force:apex:test:run -u $QA_ORG_USERNAME --resultformat human
+#    displayName: 'Run Apex tests on QA Org'
