@@ -30,8 +30,8 @@ steps:
     displayName: 'Install Salesforce CLI'
 
   - script: |
-      echo "Authenticating to Salesforce Developer Org..."
-      sfdx auth:jwt:grant --client-id $DEV_ORG_CLIENT_ID --jwt-key-file keys/server.key --username $DEV_ORG_USERNAME --instance-url https://login.salesforce.com
+      echo "Authenticating to Salesforce Developer Org..."      
+      sfdx force:auth:web:login --setalias myOrgAlias --username $(SF_USERNAME) --password $(SF_PASSWORD)
     env:
       DEV_ORG_CLIENT_ID: $(DEV_ORG_CLIENT_ID)
       DEV_ORG_USERNAME: $(DEV_ORG_USERNAME)
@@ -45,7 +45,7 @@ steps:
 
   - script: |
       echo "Authenticating to Salesforce QA Org..."
-      sfdx auth:jwt:grant --client-id $QA_ORG_CLIENT_ID --jwt-key-file keys/server.key --username $QA_ORG_USERNAME --instance-url https://login.salesforce.com
+      sfdx force:auth:web:login --setalias myOrgAlias --username $(SF_USERNAME) --password $(SF_PASSWORD)
     env:
       QA_ORG_CLIENT_ID: $(QA_ORG_CLIENT_ID)
       QA_ORG_USERNAME: $(QA_ORG_USERNAME)
@@ -61,3 +61,5 @@ steps:
 #      echo "Running tests on QA Org..."
 #      sfdx force:apex:test:run -u $QA_ORG_USERNAME --resultformat human
 #    displayName: 'Run Apex tests on QA Org'
+#sfdx auth:jwt:grant --client-id $DEV_ORG_CLIENT_ID --jwt-key-file keys/server.key --username $DEV_ORG_USERNAME --instance-url https://login.salesforce.com
+#sfdx auth:jwt:grant --client-id $QA_ORG_CLIENT_ID --jwt-key-file keys/server.key --username $QA_ORG_USERNAME --instance-url https://login.salesforce.com
