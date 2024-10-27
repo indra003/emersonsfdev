@@ -31,7 +31,7 @@ steps:
 
   - script: |
       echo "Authenticating to Salesforce Developer Org..."      
-      sfdx force:auth:web:login --setalias myOrgAlias --username $(SF_DEVUSERNAME) --password $(SF_DEVPASSWORD)
+      sfdx org:login:web --setalias myOrgAlias --username $(SF_DEVUSERNAME) --password $(SF_DEVPASSWORD)
     env:
       DEV_ORG_CLIENT_ID: $(DEV_ORG_CLIENT_ID)
       DEV_ORG_USERNAME: $(DEV_ORG_USERNAME)
@@ -45,7 +45,7 @@ steps:
 
   - script: |
       echo "Authenticating to Salesforce QA Org..."
-      sfdx force:auth:web:login --setalias myOrgAlias --username $(SF_QAUSERNAME) --password $(SF_QAPASSWORD)
+      sfdx org:login:web --setalias myOrgAlias --username $(SF_QAUSERNAME) --password $(SF_QAPASSWORD)
     env:
       QA_ORG_CLIENT_ID: $(QA_ORG_CLIENT_ID)
       QA_ORG_USERNAME: $(QA_ORG_USERNAME)
