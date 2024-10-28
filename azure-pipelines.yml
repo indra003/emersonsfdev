@@ -31,13 +31,11 @@ steps:
 
   - script: |
       echo "Authenticating to Salesforce Developer Org..."      
-      sfdx org:login:web --setalias myOrgAlias --username $SF_DEVUSERNAME --password $SF_DEVPASSWORD
+      sfdx auth:jwt:grant --client-id $DEV_ORG_CLIENT_ID --jwt-key-file keys/server.key --username $DEV_ORG_USERNAME --instance-url https://login.salesforce.com
     env:
       DEV_ORG_CLIENT_ID: $(DEV_ORG_CLIENT_ID)
       DEV_ORG_USERNAME: $(DEV_ORG_USERNAME)
       JWT_KEY: $(JWT_KEY)
-      SF_DEVUSERNAME: $(SF_DEVUSERNAME)
-      SF_DEVPASSWORD: $(SF_DEVPASSWORD)
     displayName: 'Authenticate to Salesforce Dev Org'
 
   - script: |
@@ -47,13 +45,11 @@ steps:
 
   - script: |
       echo "Authenticating to Salesforce QA Org..."
-      sfdx org:login:web --setalias myOrgAlias --username $SF_QAUSERNAME --password $SF_QAPASSWORD
+      sfdx auth:jwt:grant --client-id $QA_ORG_CLIENT_ID --jwt-key-file keys/server.key --username $QA_ORG_USERNAME --instance-url https://login.salesforce.com
     env:
       QA_ORG_CLIENT_ID: $(QA_ORG_CLIENT_ID)
       QA_ORG_USERNAME: $(QA_ORG_USERNAME)
       JWT_KEY: $(JWT_KEY)
-      SF_QAUSERNAME: $(SF_QAUSERNAME)
-      SF_QAPASSWORD: $(SF_QAPASSWORD)
     displayName: 'Authenticate to Salesforce QA Org'
 
   - script: |
@@ -67,3 +63,4 @@ steps:
 #    displayName: 'Run Apex tests on QA Org'
 #sfdx auth:jwt:grant --client-id $DEV_ORG_CLIENT_ID --jwt-key-file keys/server.key --username $DEV_ORG_USERNAME --instance-url https://login.salesforce.com
 #sfdx auth:jwt:grant --client-id $QA_ORG_CLIENT_ID --jwt-key-file keys/server.key --username $QA_ORG_USERNAME --instance-url https://login.salesforce.com
+#sfdx org:login:web --setalias myOrgAlias --username $SF_QAUSERNAME --password $SF_QAPASSWORD
