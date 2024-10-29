@@ -5,11 +5,11 @@
 
 #trigger:
 #- main
-trigger:
-  branches:
-    include:
-      - main  # You can adjust the branch based on your source control setup
-
+trigger: none
+  #branches:
+  #  include:
+  #    - main  # You can adjust the branch based on your source control setup
+    
 pool:
   vmImage: 'ubuntu-latest'  # You can use a Windows agent as well if needed
 
@@ -23,7 +23,12 @@ steps:
     inputs:
       versionSpec: '16.x'  # Salesforce CLI works with Node.js
     displayName: 'Use Node.js 16.x'
-
+  - task: CopyFiles@2
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)/keys'
+      Contents: 'server.key'
+      TargetFolder: '/home/vsts/work/1/s/keys'
+    
   - script: |
       echo "Installing Salesforce CLI..."
       npm install sfdx-cli --global
