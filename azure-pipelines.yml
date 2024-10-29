@@ -24,7 +24,11 @@ steps:
       versionSpec: '16.x'  # Salesforce CLI works with Node.js
     displayName: 'Use Node.js 16.x'
 
-
+  - task: CopyFiles@2
+    inputs:
+      SourceFolder: '/'
+      Contents: 'server.key'
+      TargetFolder: '/home/vsts/work/1/s/keys'
     
   - script: |
       echo "Installing Salesforce CLI..."
