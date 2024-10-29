@@ -36,7 +36,7 @@ steps:
 
   - script: |
       echo "Authenticating to Salesforce Developer Org..."      
-      sfdx auth:jwt:grant --client-id $DEV_ORG_CLIENT_ID --jwt-key-file keys/server.key --username $DEV_ORG_USERNAME --instance-url https://login.salesforce.com
+      sfdx auth:jwt:grant --client-id $DEV_ORG_CLIENT_ID --jwt-key-file keys/server.key --username $DEV_ORG_USERNAME --instance-url https://nosoftware-page-6404--emrdev1.sandbox.lightning.force.com/
     env:
       DEV_ORG_CLIENT_ID: $(DEV_ORG_CLIENT_ID)
       DEV_ORG_USERNAME: $(DEV_ORG_USERNAME)
@@ -50,7 +50,7 @@ steps:
 
   - script: |
       echo "Authenticating to Salesforce QA Org..."
-      sfdx auth:jwt:grant --client-id $QA_ORG_CLIENT_ID --jwt-key-file keys/server.key --username $QA_ORG_USERNAME --instance-url https://login.salesforce.com
+      sfdx auth:jwt:grant --client-id $QA_ORG_CLIENT_ID --jwt-key-file keys/server.key --username $QA_ORG_USERNAME --instance-url https://deloitte-em-poc--emdemo.sandbox.lightning.force.com/
     env:
       QA_ORG_CLIENT_ID: $(QA_ORG_CLIENT_ID)
       QA_ORG_USERNAME: $(QA_ORG_USERNAME)
