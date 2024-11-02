@@ -1,36 +1,54 @@
 # Starter pipeline
+
 # Start with a minimal pipeline that you can customize to build and deploy your code.
+
 # Add steps that build, run tests, deploy, and more:
+
 # https://aka.ms/yaml
 
 #trigger:
 #- main
 trigger: none
-  #branches:
-  #  include:
-  #    - main  # You can adjust the branch based on your source control setup
-    
+
+#branches:
+#  include:
+#    - main  # You can adjust the branch based on your source control setup
+
 pool:
-  vmImage: 'windows-latest'  # You can use a Windows agent as well if needed
+  vmImage: 'ubuntu-latest'  # You can use a Windows agent as well if needed
+
+variables:
+  GITHUB_REPO: 'indra003/emersonsfdev'  # Replace with your GitHub repo
+  FILE_PATH: '/'  # Replace with the path to the file in the repo
+  OUTPUT_PATH: 'server.key'  # Replace with the desired output file name
+  DESTINATION_PATH: '/home/vsts/work/1/s/keys'  # Destination path for the copied file
 
 steps:
+  - task: CopyFiles@2
+    inputs:
+      SourceFolder: ''
+      Contents: '$(OUTPUT_PATH)'
+      TargetFolder: '$(DESTINATION_PATH)'
+
   - task: UsePythonVersion@0  # Salesforce CLI uses node.js, ensure Node.js is available if needed
     inputs:
       versionSpec: '3.x'
     displayName: 'Use Python 3.x'
-    
+
   - task: NodeTool@0
     inputs:
       versionSpec: '16.x'  # Salesforce CLI works with Node.js
     displayName: 'Use Node.js 16.x'
 
-  - task: DownloadSecureFile@1
-    inputs:
-      secureFile: 'jwt.key'
   - script: |
       echo "Installing Salesforce CLI..."
       npm install sfdx-cli --global
     displayName: 'Install Salesforce CLI'
+
+  - script: |
+      echo "Downloading file from GitHub..."
+      curl -H "Authorization: token $(GITHUB_PAT)" -L https://raw.githubusercontent.com/$(GITHUB_REPO)/main/$(FILE_PATH)
+    displayName: 'Download file from GitHub'
 
   - script: |
       echo "Authenticating to Salesforce QA Org..."
@@ -45,11 +63,3 @@ steps:
       echo "Deploying code to Salesforce QA Org..."
       sfdx force:source:deploy -u $QA_ORG_USERNAME -m ApexClass,ApexTrigger  # Adjust the metadata types based on your need
     displayName: 'Deploy metadata to Salesforce QA Org'
-
-#  - script: |
-#      echo "Running tests on QA Org..."
-#      sfdx force:apex:test:run -u $QA_ORG_USERNAME --resultformat human
-#    displayName: 'Run Apex tests on QA Org'
-#sfdx auth:jwt:grant --client-id $DEV_ORG_CLIENT_ID --jwt-key-file keys/server.key --username $DEV_ORG_USERNAME --instance-url https://login.salesforce.com
-#sfdx auth:jwt:grant --client-id $QA_ORG_CLIENT_ID --jwt-key-file keys/server.key --username $QA_ORG_USERNAME --instance-url https://login.salesforce.com
-#sfdx org:login:web --setalias myOrgAlias --username $SF_QAUSERNAME --password $SF_QAPASSWORD
