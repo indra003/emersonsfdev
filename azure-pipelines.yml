@@ -11,7 +11,7 @@ trigger: none
   #    - main  # You can adjust the branch based on your source control setup
     
 pool:
-  vmImage: 'ubuntu-latest'  # You can use a Windows agent as well if needed
+  vmImage: 'windows-latest'  # You can use a Windows agent as well if needed
 
 steps:
   - task: UsePythonVersion@0  # Salesforce CLI uses node.js, ensure Node.js is available if needed
