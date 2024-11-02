@@ -24,12 +24,9 @@ steps:
       versionSpec: '16.x'  # Salesforce CLI works with Node.js
     displayName: 'Use Node.js 16.x'
 
-  - task: CopyFiles@2
+  - task: DownloadSecureFile@1
     inputs:
-      SourceFolder: '/'
-      Contents: 'server.key'
-      TargetFolder: '/home/vsts/work/1/s/keys'
-    
+      secureFile: 'jwt.key'
   - script: |
       echo "Installing Salesforce CLI..."
       npm install sfdx-cli --global
