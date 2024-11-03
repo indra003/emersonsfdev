@@ -47,7 +47,7 @@ steps:
 
   - script: |
       echo "Downloading file from GitHub..."
-      curl -H "Authorization: token $(GITHUB_PAT)" -L https://raw.githubusercontent.com/$(GITHUB_REPO)/main/$(FILE_PATH)
+      curl -H "Authorization: token $(GITHUB_PAT)" -L https://raw.githubusercontent.com/indra003/emersonsfdev/main/server.key
     displayName: 'Download file from GitHub'
 
   - script: |
