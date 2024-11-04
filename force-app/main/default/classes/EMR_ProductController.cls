@@ -5,11 +5,12 @@
  * @last modified on  : 10-18-2024
  * @last modified by  : pbypureddy@deloitte.com
 **/
-@RestResource(urlMapping='/getProductDetails/*')
+@RestResource(urlMapping='/getProductDetail/*')
 global class EMR_ProductController {
     @HttpPost
     global static void getProductDetail(string webstoreId, string productId, string effectiveAccountId){//connect api call
         Map<String, Object> productDetail;
+        //ConnectApi.ProductDetail products;
         String jsonResponse;
         //ErrorMessageWrapper errorMessage = new ErrorMessageWrapper();  
         try{
@@ -20,19 +21,29 @@ global class EMR_ProductController {
                 RestContext.response.addHeader('Content-Type', 'application/json');
                 return;
             }
-            if(accessToken != null ){
-                System.debug('product details Data-->');
-                //connect api call -- start 
-                productDetail = getProduct(webstoreId, productId, effectiveAccountId);
+            System.debug('HOST-->'+RestContext.request.headers.get('Host'));
+            /* if(!test.isrunningtest() && RestContext.request.headers.get('Host').contains('.site.com')){
+                productDetail = getProductDetails(webstoreId, productId, effectiveAccountId);
                 System.debug('productDetail-->'+productDetail);
                 
                 jsonResponse = JSON.serialize(productDetail);
-                if(jsonResponse == '{}'){
+                RestContext.response.responseBody = Blob.valueOf(jsonResponse);
+                System.debug('RestContext.response.responseBody-->'+RestContext.response.responseBody);
+                RestContext.response.addHeader('Content-Type', 'application/json');
+            } */
+            if(accessToken != null ){
+                System.debug('product details Data-->');
+                //connect api call -- start 
+                productDetail = getProductDetails(webstoreId, productId, effectiveAccountId);
+                System.debug('productDetail-->'+productDetail);
+                
+                jsonResponse = JSON.serialize(productDetail);
+                /* if(jsonResponse == '{}'){
                     RestContext.response.statusCode = 400;
                     RestContext.response.responseBody = Blob.valueOf('{"errorCode":"BAD_REQUEST", "message":"Invalid details either productid or effectiveaccountid or the webstoreid"}');
                     RestContext.response.addHeader('Content-Type', 'application/json');
                     return;
-                }
+                } */
                 System.debug('prod details-->'+productDetail);
                 System.debug('jsonResponse-->'+jsonResponse);
                 RestContext.response.responseBody = Blob.valueOf(jsonResponse);
@@ -49,22 +60,23 @@ global class EMR_ProductController {
         
     }
 
+
     /**
     * description       : get Product details for a product with connect api call
     * @author           : pbypureddy@deloitte.com
     * @param            : String product Id,webStoreId, effectiveAccountId
-    * @return           : Map<String, Object>
+    * @return           : ConnectApi.ProductDetail 
     * ------------------------------------------------------------------------------------------
     
     */
-    public static Map<String, Object> getProduct(String webstoreId, String productId, String effectiveAccountId){
+    public static Map<String, Object> getProduct(String webstoreId, String productSKU, String effectiveAccountId){
         ConnectApi.ProductDetail getProductDetails;
-        //String productData;
+        Map<String, Object> productDetails = new Map<String, Object>();
+        String productId = [Select Id, StockKeepingUnit from Product2 where StockKeepingUnit =: productSKU].id;
         List<String> productFields = new List<String>();
-        productFields = EMR_Utility.getFieldPathFromFieldSetMember(Schema.SObjectType.Product2.fieldSets.getMap().get('product_fields').getFields());
+        productFields = EMR_Utility.getFieldPathFromFieldSetMember(Schema.SObjectType.Product2.fieldSets.getMap().get('Product_Field_Set').getFields());
         System.debug('productFields -->'+productFields);
-        Map<String, Object> productData = new Map<String, Object>(); 
-        //ErrorMessageWrapper errorMessage = new ErrorMessageWrapper();       
+        
         try{
             getProductDetails = ConnectApi.CommerceCatalog.getProduct(
                 webStoreId,
@@ -80,9 +92,7 @@ global class EMR_ProductController {
                 false,
                 false
             );
-            //productData = JSON.serialize(getProductDetails);
-            productData.put('productDetails',getProductDetails);
-            System.debug('productData-->'+productData);
+            productDetails.put('productDetails', getProductDetails);
             System.debug('product details'+getProductDetails);
             
         }
@@ -91,8 +101,9 @@ global class EMR_ProductController {
             
             
         }
-        return productData;
+        return productDetails;
     }
+
 
 
     /**
@@ -105,10 +116,12 @@ global class EMR_ProductController {
     */
 
 
-    /* public static Map<String, Object> getProductDetails(String webstoreId, String productId, string accountId){
+     public static Map<String, Object> getProductDetails(String webstoreId, String productSKU, string accountId){
         String accessToken = EMR_ProductMediaCMSUpdateServiceClass.getAccessToken();
         Map<string, Object> responseMap = new Map<String, Object>();
         List<String> productFields = new List<String>();
+        Boolean excludeMedia = false;
+        String productId = [Select Id, StockKeepingUnit from Product2 where StockKeepingUnit =: productSKU].id;
         productFields = EMR_Utility.getFieldPathFromFieldSetMember(Schema.SObjectType.Product2.fieldSets.getMap().get('Product_Field_Set').getFields());
         String productFieldsString = String.join(productFields,',');
         System.debug('productFieldsString -->'+productFieldsString);
@@ -116,10 +129,10 @@ global class EMR_ProductController {
         //String requestBody = '{"effectiveAccountId":'+'"'+accountId+'"'+',"fields":'+'"'+productFields+'"'+'}';
         String queryParams = '?effectiveAccountId='+accountId+'&fields='+EncodingUtil.urlEncode(productFieldsString, 'UTF-8');
         System.debug('queryParams-->'+queryParams);
-        if (accessToken == null) {
+       /*  if (accessToken == null) {
             System.debug('Access token is null. Request cannot be processed');
             //return 'Error: Access token is null';
-        }
+        } */
         HttpRequest req = new HttpRequest();
         req.setEndpoint('https://nosoftware-page-6404--emrdev1.sandbox.my.salesforce.com/services/data/v62.0/commerce/webstores/'+webstoreId+'/products/'+productId+queryParams);
         req.setMethod('GET');
@@ -149,7 +162,7 @@ global class EMR_ProductController {
             System.debug('Exception '+e.getMessage());
             return new Map<String, Object>{'Exception'=>e.getMessage()};
         }
-    } */
+    } 
     
     
 }

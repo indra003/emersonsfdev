@@ -38,7 +38,7 @@ global with sharing class B2BTaxSample implements sfdc_checkout.CartTaxCalculati
                     cartItemSKU = 'ChargeSKU';
                 }
                 cartItemIdsBySKU.put(cartItemSKU, cartItem.Id);
-                cartItemTotalPriceBySKU.put(cartItemSKU, cartItem.TotalPrice);
+                cartItemTotalPriceBySKU.put(cartItemSKU, (cartItem.TotalPrice==null)? 0: cartItem.TotalPrice); //added by Poojitha child product's price is getting as null and getting an null pointer exception to avoid this if price is null making it as zero else seding the actual price
                 System.debug('cartItemTotalPriceBySKU -->'+cartItemTotalPriceBySKU);
             } 
             //Map<String, TaxDataFromExternalService> rateAndAmountFromExternalServicePerSku = new Map<String,TaxDataFromExternalService>();
@@ -100,6 +100,8 @@ global with sharing class B2BTaxSample implements sfdc_checkout.CartTaxCalculati
             // In production you probably want this to be an admin-type error. In that case, throw the exception here
             // and make sure that a notification system is in place to let the admin know that the error occurred.
             // See the readme section about error handling for details about how to create that notification.
+            Logger.error(e.getMessage() + e.getStackTraceString());
+            Logger.saveLog();
             return integrationStatusFailedWithCartValidationOutputError(
                 integStatus,
                 'An exception of type ' + e.getTypeName() + ' has occurred: ' + e.getMessage(),
@@ -230,12 +232,17 @@ global with sharing class B2BTaxSample implements sfdc_checkout.CartTaxCalculati
  
         Map<String, TaxDataFromExternalService> taxDataFromStaticServiceBySKU = new Map<String, TaxDataFromExternalService>();
         for (String sku : cartItemTotalAmountBySKU.keySet()) {
+            System.debug('cartItemTotalAmountBySKU keyset-->'+cartItemTotalAmountBySKU.keySet());
+            System.debug('cartItemTotalAmountBySKU-->'+cartItemTotalAmountBySKU.get(sku));
             taxDataFromStaticServiceBySKU.put(sku, new TaxDataFromExternalService(
                 taxRate,
                 cartItemTotalAmountBySKU.get(sku) * taxRate,
                 'GST'
             ));
+            System.debug('taxDataFromStaticServiceBySKU-->'+taxDataFromStaticServiceBySKU);
         }
+        System.debug('taxDataFromStaticServiceBySKU-->'+taxDataFromStaticServiceBySKU.keySet());
+        System.debug('taxDataFromStaticServiceBySKU -->'+taxDataFromStaticServiceBySKU);
         return taxDataFromStaticServiceBySKU;
     }
 }

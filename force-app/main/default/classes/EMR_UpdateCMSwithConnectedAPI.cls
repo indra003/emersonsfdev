@@ -17,12 +17,11 @@ global without sharing class EMR_UpdateCMSwithConnectedAPI {
     global static void replaceManagedContentVariantWithMedia(EMR_ProductMediaCMSUpdateServiceClass.RequestWrapper requestBody){
         
         List<ProductMedia> lstProdMedia=new List<ProductMedia>();
-        String strContentVariantId;
+        String strContentId;
         String strtitleinCMS;
+        List<String> lstContentIds=new List<String>();
         ConnectApi.ManagedContentDeliveryDocument cmsDelivery;
-        ConnectApi.ManagedContentVariantUpdateInput mediaInputcontentBody = new ConnectApi.ManagedContentVariantUpdateInput();
-        String variantId = '9PsD70000004EJoKAM';
-        String title = 'NewImageOct23';
+        Boolean boolFlag=false;
         try {
         String strReq=JSON.serialize(requestBody);
         EMR_ProductMediaCMSUpdateServiceClass.RequestWrapper requestWrapper = (EMR_ProductMediaCMSUpdateServiceClass.RequestWrapper) JSON.deserialize(strReq, EMR_ProductMediaCMSUpdateServiceClass.RequestWrapper.class);
@@ -34,52 +33,31 @@ global without sharing class EMR_UpdateCMSwithConnectedAPI {
         if(!lstProdMedia.isEmpty())
         {
             
-        cmsDelivery=ConnectApi.ManagedContentDelivery.getManagedContentForChannel('channelID',lstProdMedia[0].ElectronicMediaid,true); // channel id will be dependent on the type of prod- fctl, syss
-        strContentVariantId=cmsDelivery.managedContentId;
+        cmsDelivery=ConnectApi.ManagedContentDelivery.getManagedContentForChannel('',lstProdMedia[0].ElectronicMediaid,true); // channel id will be dependent on the type of prod- fctl, syss
+        strContentId=cmsDelivery.managedContentId;
         Object newsf= cmsDelivery.contentBody.get('sfdc_cms:media') ;
         Map<String,Object> contentBody = (Map<String,Object>)ConnectApi.ConnectUtilities.unwrapApexWrapper(newsf);
         String strURLfrmCMS=(String)contentBody.get('url');
         strtitleinCMS=(String)cmsDelivery.contentBody.get('altText') ;
+        lstContentIds.add(strContentId);
         if(strURLfrmCMS!=requestWrapper.strImageURL)
         {
-            //ConnectApi.ManagedContent.createManagedContent(contedocuInput);
-            // product-media update also
+            createCMSContent(requestWrapper);
+            boolFlag=true;
            
         }
         else if(strtitleinCMS==requestWrapper.strTitle) {
-
-           //ConnectApi.ManagedContent.replaceManagedContentVariantWithMedia(strContentVariantId,mediaInputcontentBody,null); 
+            ManagedContentVariant mcVariant=[select id,name,ManagedContentId from ManagedContentVariant where  ManagedContentId=:strContentId with security_enforced];
+            updatecontent(requestWrapper,mcVariant.id) ;
+            boolFlag=true;
+        }
+        if(boolFlag)
+        {
+        publishContent(lstContentIds);
         }
         }
-        
-        
-        mediaInputcontentBody.title=title;//requestWrapper.strTitle;
-        Blob data;
-        //ConnectApi.BinaryInput contentData = new ConnectApi.BinaryInput(data,'sfdc_cms__image','NewImageOct23.jpg');
-        Map<String,Object> sourceMap = new Map<String,Object>();
-        sourceMap.put('type','url');
-        sourceMap.put('url','https://www.emerson.com/resource/image/16674/portrait_ratio1x1/176/176/a9f8d2f05b87e56bf1f324ead97a0274/A2ED50ACB7531C28F9C9561E046CB45C/aprod-flow-micro-motion-hseries-pdp-family.jpg');
-        //requestWrapper.strImageURL
-        sourceMap.put('mimeType',null);
-        
-        Map<String,Object> level1Map = new Map<String,Object>();
-        level1Map.put('altText',title);
-        level1Map.put('sfdc_cms:media', sourceMap);
-        
-        ConnectApi.ManagedContentBodyInput variantInput = new ConnectApi.ManagedContentBodyInput();
-        //variantInput.title = title;
-        //variantInput.description = description;
-        variantInput.nodeMap = level1Map;
-        mediaInputcontentBody.contentBody=variantInput;
-        //ConnectApi.ManagedContentNodeInput mediaNode = new ConnectApi.ManagedContentNodeInput();
-        //mediaNode.body = mediaInput;
-        //variantInput.nodeMap.put('Url', 'ImageURL');
-        
-        ConnectApi.ManagedContentVariant updatedVariant;
-       
-            //ManagedContentvariant mcVariantRecord= [SELECT Id,urlname,name,VariantType  from ManagedContentvariant Where Name=:requestBody.strTitle WITH SYSTEM_MODE];
-            updatedVariant = ConnectApi.ManagedContent.replaceManagedContentVariantWithMedia(variantId, mediaInputcontentBody, null);
-        }catch (ConnectApi.NotFoundException ex) {
+        }   
+        catch (ConnectApi.NotFoundException ex) {
             System.debug('ConnectApi.ManagedContent NotFoundException '+ex.getMessage() + ''+ex.getStackTraceString());
         } catch (ConnectApi.ConnectApiException ex) {
             System.debug('ConnectApi.ManagedContent ConnectApiException '+ex.getMessage() + ''+ex.getStackTraceString());
@@ -88,28 +66,32 @@ global without sharing class EMR_UpdateCMSwithConnectedAPI {
         }
         
     }
-    public static void createCMSContent(){
+    /**
+    * @description createCMSContent
+    * @author hegoswami@deloitte.com | 10-25-2024 
+    * @param requestWrapper 
+    **/
+    public static void createCMSContent(EMR_ProductMediaCMSUpdateServiceClass.RequestWrapper requestWrapper){
         
-        String variantId = '9PsD70000004EJoKAM';
-        String title = 'NewImageOct24';
         
         ConnectApi.ManagedContentDocumentInput contedocuInput = new ConnectApi.ManagedContentDocumentInput();
-        Blob data;
         ConnectApi.ManagedContentBodyInput contentBody=new ConnectApi.ManagedContentBodyInput();
-        //ConnectApi.BinaryInput contentData = new ConnectApi.BinaryInput(data,'sfdc_cms__image','NewImageOct23.jpg');
         Map<String,Object> sourceMap = new Map<String,Object>();
         sourceMap.put('type','url');
-        sourceMap.put('url','https://www.emerson.com/resource/image/16674/portrait_ratio1x1/176/176/a9f8d2f05b87e56bf1f324ead97a0274/A2ED50ACB7531C28F9C9561E046CB45C/aprod-flow-micro-motion-hseries-pdp-family.jpg');
-        sourceMap.put('mimeType',null);
+        sourceMap.put('url',requestWrapper.strImageURL);
+         sourceMap.put('mimeType',null);
         
-        Map<String,Object> level1Map = new Map<String,Object>();
-        level1Map.put('altText',title);
-        level1Map.put('sfdc_cms:media', sourceMap);
-        contentBody.nodeMap=level1Map;
+        map<string, object> level1map = new map<string, object>();
+        level1map.put('source', (object)sourcemap);
+
+        Map<String,Object> nodeMap = new Map<String,Object>();
+        nodeMap.put('altText',requestWrapper.strTitle);
+        nodeMap.put('sfdc_cms:media', level1map);
+        contentBody.nodeMap=nodeMap;
         contedocuInput.contentBody=contentBody;
-        contedocuInput.contentSpaceOrFolderId='9PuD70000008crdKAA';
+        contedocuInput.contentSpaceOrFolderId=requestWrapper.strStoreNameOrWorkSpaceId;
         contedocuInput.contentType='sfdc_cms__image ';
-        contedocuInput.title=title;
+        contedocuInput.title=requestWrapper.strTitle;
         ConnectApi.ManagedContentDocument cmsCreate;
         try {
          cmsCreate=ConnectApi.ManagedContent.createManagedContent(contedocuInput);
@@ -120,6 +102,52 @@ global without sharing class EMR_UpdateCMSwithConnectedAPI {
             System.debug('ConnectApi.ManagedContent Exeception '+ex.getMessage() + ''+ex.getStackTraceString());
         }
     
+    }
+
+    /**
+    * @description updatecontent
+    * @author hegoswami@deloitte.com | 10-25-2024 
+    * @param requestWrapper 
+    * @param strVariantId 
+    **/
+    public static void updatecontent(EMR_ProductMediaCMSUpdateServiceClass.RequestWrapper requestWrapper, String strVariantId){
+        connectapi.ManagedContentVariantUpdateInput contedocuinput = new connectapi.ManagedContentVariantUpdateInput();
+        connectapi.managedcontentbodyinput contentbody = new connectapi.managedcontentbodyinput();
+        map<string, object> sourcemap = new map<string, object>();
+        sourcemap.put('type', 'url');
+        sourcemap.put('url', requestWrapper.strImageURL);
+        sourcemap.put('mimeType', 'image/jpg');
+        
+        map<string, object> level1map = new map<string, object>();
+        level1map.put('source', (object)sourcemap);
+        
+        map<string, object> nodemap = new map<string, object>();
+        nodemap.put('altText',requestWrapper.strTitle);
+        nodemap.put('sfdc_cms:media', (object)level1map); 
+        
+        
+        contentbody.nodemap = nodemap;
+        
+        contedocuinput.contentbody = contentbody;
+        contedocuinput.title = requestWrapper.strTitle;
+        
+        connectapi.ManagedContentVariant output = connectapi.managedcontent.replaceManagedContentVariant(strVariantId,contedocuinput);
+        
+        
+
+    }
+
+
+    /**
+    * @description publishContent
+    * @author hegoswami@deloitte.com | 10-25-2024 
+    * @param lstContentIds 
+    **/
+    public static void publishContent(List<String> lstContentIds)
+    {
+        ConnectApi.ManagedContentPublishInput publishParam=new ConnectApi.ManagedContentPublishInput();
+        publishParam.contentIds=lstContentIds;
+        connectapi.managedcontent.publish(publishParam);
     }
     
 }
