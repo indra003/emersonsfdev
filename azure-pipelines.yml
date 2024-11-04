@@ -53,6 +53,8 @@ steps:
   - script: |
       echo "Authenticating to Salesforce QA Org..."
       sfdx force:auth:jwt:grant --client-id $(QA_ORG_CLIENT_ID) --jwt-key-file keys/server.key --username $(QA_ORG_USERNAME) --instance-url https://deloitte-em-poc--emdemo.sandbox.my.salesforce.com
+      echo $(QA_ORG_CLIENT_ID)
+      echo $(QA_ORG_USERNAME)
     env:
       QA_ORG_CLIENT_ID: $(QA_ORG_CLIENT_ID)
       QA_ORG_USERNAME: $(QA_ORG_USERNAME)
