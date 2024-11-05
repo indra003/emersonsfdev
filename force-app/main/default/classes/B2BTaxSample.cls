@@ -101,7 +101,7 @@ global with sharing class B2BTaxSample implements sfdc_checkout.CartTaxCalculati
             // and make sure that a notification system is in place to let the admin know that the error occurred.
             // See the readme section about error handling for details about how to create that notification.
             Logger.error(e.getMessage() + e.getStackTraceString());
-            Logger.saveLog();
+            //Logger.saveLog();
             return integrationStatusFailedWithCartValidationOutputError(
                 integStatus,
                 'An exception of type ' + e.getTypeName() + ' has occurred: ' + e.getMessage(),

@@ -20,17 +20,19 @@ public without sharing class EMR_Utility {
     }
 
     /**
-    * @description          : Given a community ID, returns the relavent webstore ID for use in B2B Commerce on lightning
-    * @param  communityId   : The Id of the community from which the call originated
-    * @return weStoreId     : The webStoreId corresponding to the community Id.
-    */ 
-
-    public static String communityIdToWebstoreId(String communityId) 
-    { 
-        String webStoreId;
-        if(!test.isRunningTest()){
-            webStoreId = [SELECT WebStoreId,Name,WebStore.Name FROM WebStoreNetwork WHERE NetworkId = :communityId LIMIT 1].WebStoreId;
-        }
+    * @description      : It will fetch current store id based on the store name 
+    * @param    storeName  
+    * @return   String
+    */  
+    
+    public static String getWebStoreId(String storeName) {
+    String webStoreId;
+        try{
+            webStoreId = [SELECT Id from WebStore WHERE Name =: storeName LIMIT 1].Id;
+        }catch (Exception e) {
+            Logger.error('Error occured in utilities :: getCommunityId() :: '+ e.getMessage() + e.getStackTraceString());
+            Logger.saveLog();
+        } 
         return webStoreId;
     }
 

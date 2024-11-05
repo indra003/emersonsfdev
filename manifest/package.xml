@@ -32,6 +32,11 @@
         <members>*</members>
         <name>StaticResource</name>
     </types>
+     <!--<types>
+        <members>*</members>
+        <name>Objects</name>
+    </types>-->
     <version>62.0</version>
-    <!--comments added-->
+    
+    
 </Package>
