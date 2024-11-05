@@ -63,5 +63,5 @@ steps:
 
   - script: |
       echo "Deploying code to Salesforce QA Org..."
-      sfdx force:source:deploy -u $QA_ORG_USERNAME -m ApexClass,ApexTrigger  # Adjust the metadata types based on your need
+      sfdx force:source:deploy -u $(QA_ORG_USERNAME) -m ApexClass,ApexTrigger  # Adjust the metadata types based on your need
     displayName: 'Deploy metadata to Salesforce QA Org'
