@@ -35,8 +35,8 @@
      <types>
         <members>*</members>
         <name>Objects</name>
-    </types>-->
-    <types>
+    </types>
+    <types>-->
     <members>*</members>
     <name>CustomLabels</name>
     </types>
